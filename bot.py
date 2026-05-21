@@ -9,38 +9,26 @@ ADMIN_ID = int(os.getenv("ADMIN_ID"))
 CARD_NUMBER = os.getenv("CARD_NUMBER")
 CARD_OWNER = os.getenv("CARD_OWNER")
 
-PRODUCTS = {
-    "1": {"name": "Premium", "price": 50000},
-    "2": {"name": "Standard", "price": 30000},
-    "3": {"name": "Basic", "price": 10000},
-}
-
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    keyboard = "1️⃣ Premium - 50,000 so'm\n2️⃣ Standard - 30,000 so'm\n3️⃣ Basic - 10,000 so'm"
-    await update.message.reply_text(f"Salom! 👋\n\nQaysi paketni tanlaysiz?\n\n{keyboard}")
+    await update.message.reply_text("Buyurtma bermoqchi bolgan mahsulot kodini tashlang:")
     return QUANTITY
 
 async def get_quantity(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    text = update.message.text.strip()
-    if not text.isdigit() or int(text) < 1:
-        await update.message.reply_text("❌ Iltimos, faqat musbat raqam kiriting (1, 2, 3...)")
+    product_code = update.message.text.strip()
+    if not product_code:
+        await update.message.reply_text("❌ Iltimos, mahsulot kodini kiriting!")
         return QUANTITY
-    if text not in PRODUCTS:
-        await update.message.reply_text("❌ Noto'g'ri raqam! 1, 2 yoki 3 ni tanlang.")
-        return QUANTITY
-    context.user_data["product_id"] = text
-    product = PRODUCTS[text]
-    await update.message.reply_text(f"✅ Siz {product['name']} paketini tanladingiz.\n\nNarxi: {product['price']} so'm\n\nTo'lovni tasdiqlaysizmi? (ha/yo'q)")
+    context.user_data["product_code"] = product_code
+    await update.message.reply_text(f"✅ Mahsulot kodi: {product_code}\n\nTo'lovni tasdiqlaysizmi? (ha/yo'q)")
     return CONFIRM
 
 async def confirm_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text.strip().lower()
     if text == "ha":
-        product_id = context.user_data.get("product_id")
-        product = PRODUCTS[product_id]
-        payment_text = f"💳 To'lov ma'lumotlari:\n\nKarta: {CARD_NUMBER}\nEgasi: {CARD_OWNER}\n\nNarxi: {product['price']} so'm\n\nTo'lovni amalga oshirgandan so'ng, screenshotni yuboring."
+        product_code = context.user_data.get("product_code")
+        payment_text = f"💳 To'lov ma'lumotlari:\n\nKarta: {CARD_NUMBER}\nEgasi: {CARD_OWNER}\n\nMahsulot kodi: {product_code}\n\nTo'lovni amalga oshirgandan so'ng, screenshotni yuboring."
         await update.message.reply_text(payment_text)
-        admin_text = f"🔔 Yangi buyurtma!\n\nFoydalanuvchi: {update.message.from_user.first_name}\nID: {update.message.from_user.id}\nPaket: {product['name']}\nNarxi: {product['price']} so'm"
+        admin_text = f"🔔 Yangi buyurtma!\n\nFoydalanuvchi: {update.message.from_user.first_name}\nID: {update.message.from_user.id}\nMahsulot kodi: {product_code}"
         await context.bot.send_message(chat_id=ADMIN_ID, text=admin_text)
         return ConversationHandler.END
     elif text == "yo'q":

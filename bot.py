@@ -28,9 +28,9 @@ async def get_quantity(update: Update, context: ContextTypes.DEFAULT_TYPE):
 	if not text.isdigit() or int(text) < 1:
 		await update.message.reply_text("❌ Iltimos, faqat musbat raqam kiriting (1, 2, 3...)")
 		return QUANTITY
-	if text not in PRODUCTS:
-		await update.message.reply_text("❌ Noto'g'ri raqam! 1, 2 yoki 3 ni tanlang.")
-		return QUANTITY
+    if not text.isdigit() or int(text) < 1:
+        await update.message.reply_text("❌ Iltimos, faqat musbat raqam kiriting (1, 2, 3...)")
+        return QUANTITY
 	context.user_data["product_id"] = text
 	product = PRODUCTS[text]
 	await update.message.reply_text(f"✅ Siz {product['name']} paketini tanladingiz.\n\nNarxi: {product['price']} so'm\n\nTo'lovni tasdiqlaysizmi? (ha/yo'q)")
